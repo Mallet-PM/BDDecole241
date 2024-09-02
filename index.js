@@ -49,15 +49,23 @@ app.get('/alumni/:id', async (req, res, next) => {
 // Route pour créer un nouvel alumni
 app.post('/alumnis', async (req, res, next) => {
   try {
-    if (!req.body || !req.body.description) {
-      return res.status(400).json({ error: 'Requête invalide' });
+    const { nom, prenom, email, promo, campus, genre, date_de_naissance, numero, referentiel, periode } = req.body;
+
+    // validation des donnees entrant
+    if (!nom || !prenom || !email || !promo || !campus || !genre || !date_de_naissance || !numero || !referentiel || !periode) {
+      return res.status(400).json({ error: 'Requête invalide: Tous les champs sont obligatoires.' });
     }
-    const newAlumni = await prisma.alumni.create({ data: { description: req.body.description } });
+
+    const newAlumni = await prisma.alumni.create({ 
+      data: { nom, prenom, email, promo, campus, genre, date_de_naissance, numero, referentiel, periode } 
+    });
+
     res.status(201).json({ message: 'Alumni ajouté avec succès', alumni: newAlumni });
   } catch (error) {
     next(error);
   }
 });
+
 
 // Route pour mettre à jour un alumni par ID
 app.put('/alumni/:id', async (req, res, next) => {
