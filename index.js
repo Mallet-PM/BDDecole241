@@ -1,28 +1,25 @@
 import express from 'express';
 import bodyParser from 'body-parser';
+import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
 
 const app = express();
 const port = 3000;
 
-
-
 app.use(bodyParser.json());
+app.use(cors());
+app.options('*', cors());
 
-/*let alumnis = [
-  { id: 1, description: 'alumni philippe' },
-  { id: 2, description: 'alumni Mallet' },
-];*/
+const prisma = new PrismaClient();
 
-app.get('/alumnis', (req, res) => {
-  const alumnisReferences = alumnis.map(alumni => `/alumnis/${alumni.id}`);
-  res.json(alumnisReferences);
+app.get('/alumnis', async (req, res) => {
+  const alumnis = await prisma.alumni.findMany();
+  res.json(alumnis);
 });
 
-app.get('/alumni/:id', (req, res) => {
+app.get('/alumni/:id', async (req, res) => {
   const alumniId = parseInt(req.params.id);
-  const alumni = alumnis.find(alumni => alumni.id === alumniId); 
-
+  const alumni = await prisma.alumni.findUnique({ where: { id: alumniId } });
   if (alumni) {
     res.json(alumni);
   } else {
@@ -30,46 +27,36 @@ app.get('/alumni/:id', (req, res) => {
   }
 });
 
-app.post('/alumnis', (req, res) => {
+app.post('/alumnis', async (req, res) => {
   if (!req.body || !req.body.description) {
     res.status(400).json({ error: 'Requête invalide' });
     return;
   }
-
-  const newAlumni = {
-    id: alumnis.length + 1,
-    description: req.body.description,
-  };
-  alumnis.push(newAlumni);
+  const newAlumni = await prisma.alumni.create({ data: { description: req.body.description } });
   res.status(201).json({ message: 'Alumni ajouté avec succès', alumni: newAlumni });
+});
+
+app.put('/alumni/:id', async (req, res) => {
+  const alumniId = parseInt(req.params.id);
+  const alumni = await prisma.alumni.findUnique({ where: { id: alumniId } });
+  if (alumni) {
+    const updatedAlumni = await prisma.alumni.update({ where: { id: alumniId }, data: { description: req.body.description } });
+    res.json({ message: 'Alumni mis à jour avec succès', alumni: updatedAlumni });
+  } else {
+    res.status(404).json({ error: 'Alumni non trouvée' });
+  }
+});
+
+app.delete('/alumni/:id', async (req, res) => {
+  const alumniId = parseInt(req.params.id);
+  await prisma.alumni.delete({ where: { id: alumniId } });
+  res.json({ message: 'Alumni supprimé avec succès' });
 });
 
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ error: 'Erreur interne du serveur' });
 });
-
-
-app.put('/alumni/:id', (req,res) => {
-    const alumniId = parseInt(req.params.id);
-    const alumni = alumnis.find(alumni => alumni.id === alumniId);
-    if (alumni) {
-        alumni.description = req.body.description;
-        res.json({message: 'Alumni mis à jour avec succes', alumni });
-    } else {
-        res.status(404).json({ error: 'Alumni non trouvée'});
-    }
-});
-
-
-app.delete('/alumni/:id', (req, res) => {
-    const alumniId = parseInt(req.params.id);
-    alumnis = alumnis.filter(alumni => alumni.id !== alumniId);
-    res.json({ message: 'Alumni supprimé avec succes'});
-});
-
-
-const prisma = new PrismaClient();
 
 async function main() {
   try {
@@ -82,7 +69,6 @@ async function main() {
 
 main();
 
-
 app.listen(port, () => {
-    console.log(`Serveur ecoutant sur le port ${port}`);
-})
+  console.log(`Serveur écoutant sur le port ${port}`);
+});
