@@ -12,16 +12,17 @@ const corsOptions = {
   origin: 'https://formulair-ten.vercel.app', 
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  maxAge: 3600, 
+  maxAge: 3600,
 };
 
-app.use(bodyParser.json());
+// Appliquer le middleware CORS de manière globale
 app.use(cors(corsOptions));
 
-// Middleware pour gérer les requêtes de pré-vérification (OPTIONS)
-app.options('*', cors(corsOptions));
+// Autres middlewares
+app.use(bodyParser.json());
 
-// Route pour récupérer tous les alumnis
+// Routes pour gérer les alumnis
+
 app.get('/alumnis', async (req, res, next) => {
   try {
     const alumnis = await prisma.alumni.findMany();
@@ -31,7 +32,6 @@ app.get('/alumnis', async (req, res, next) => {
   }
 });
 
-// Route pour récupérer un alumni par ID
 app.get('/alumni/:id', async (req, res, next) => {
   try {
     const alumniId = parseInt(req.params.id);
@@ -46,12 +46,11 @@ app.get('/alumni/:id', async (req, res, next) => {
   }
 });
 
-// Route pour créer un nouvel alumni
 app.post('/alumnis', async (req, res, next) => {
   try {
     const { nom, prenom, email, promo, campus, genre, date_de_naissance, numero, referentiel, periode } = req.body;
 
-    // validation des donnees entrant
+    // Validation des données entrantes
     if (!nom || !prenom || !email || !promo || !campus || !genre || !date_de_naissance || !numero || !referentiel || !periode) {
       return res.status(400).json({ error: 'Requête invalide: Tous les champs sont obligatoires.' });
     }
@@ -66,8 +65,6 @@ app.post('/alumnis', async (req, res, next) => {
   }
 });
 
-
-// Route pour mettre à jour un alumni par ID
 app.put('/alumni/:id', async (req, res, next) => {
   try {
     const alumniId = parseInt(req.params.id);
@@ -86,7 +83,6 @@ app.put('/alumni/:id', async (req, res, next) => {
   }
 });
 
-// Route pour supprimer un alumni par ID
 app.delete('/alumni/:id', async (req, res, next) => {
   try {
     const alumniId = parseInt(req.params.id);
@@ -125,3 +121,4 @@ process.on('SIGINT', async () => {
 app.listen(port, () => {
   console.log(`Serveur écoutant sur le port ${port}`);
 });
+
