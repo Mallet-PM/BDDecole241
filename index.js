@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 
 // Configuration de CORS
 const corsOptions = {
-  origin: 'https://formulair-ten.vercel.app',
+  origin: 'délicate-babka-fbbc73',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   maxAge: 3600,
@@ -21,6 +21,8 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // Routes pour gérer les alumnis
+
+app.options('/alumnis', cors(corsOptions));
 
 app.get('/alumnis', async (req, res, next) => {
   try {
