@@ -6,9 +6,17 @@ import { PrismaClient } from '@prisma/client';
 const app = express();
 const port = 3000;
 
+// Configuration de CORS pour autoriser les requêtes en provenance de tous les domaines
+const corsOptions = {
+  origin: '*', // ou spécifiez un domaine spécifique, par exemple 'https://formulair-ten.vercel.app'
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  maxAge: 3600, // en secondes
+};
+
 app.use(bodyParser.json());
-app.use(cors());
-app.options('*', cors());
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 const prisma = new PrismaClient();
 
