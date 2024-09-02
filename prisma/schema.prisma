@@ -3,6 +3,7 @@
 
 // schema.prisma
 
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,31 +13,34 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Apprenant {
-  id_apprenant String  @id @map("_id") @default(auto()) @db.ObjectId
-  noms          String
-  prenoms       String
-  date_de_naissance DateTime
-  email         String
-  telephone      Int
-  
-}
-
-model Promotion {
-  id_promo String  @id @map("_id") @default(auto()) @db.ObjectId
-  nom       String
+model Promotions {
+  id_promo   String   @id @map("_id") @default(auto()) @db.ObjectId
+  nom        String
   campus     String
-
+  periodeId  String?  @db.ObjectId 
+  Periode    Periode? @relation(fields: [periodeId], references: [id_annee])
+ 
 }
-model Periode {
-  id_annee  String  @id @map("_id") @default(auto()) @db.ObjectId
-  annee     Int
 
+model Periode {
+  id_annee   String       @id @map("_id") @default(auto()) @db.ObjectId
+  annee      Int
+  Promotions Promotions[]
+}
+
+model Apprenants {
+  id_apprenants       String  @id @map("_id") @default(auto()) @db.ObjectId
+  noms                String
+  prenoms             String
+  date_de_naissance   DateTime
+  email               String
+  telephone           String
+  referentielId       String? @db.ObjectId
+  referentiel         Referentiel? @relation(fields: [referentielId], references: [id_referentiel])
 }
 
 model Referentiel {
-  id_referentiel String  @id @map("_id") @default(auto()) @db.ObjectId
-  nom            String
-
+  id_referentiel  String      @id @map("_id") @default(auto()) @db.ObjectId
+  nom             String
+  Apprenants      Apprenants[]
 }
-
