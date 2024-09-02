@@ -1,15 +1,14 @@
 import express from 'express';
-import bodyParser from 'body-parser';
 import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 const prisma = new PrismaClient();
 
-// Configuration de CORS 
+// Configuration de CORS
 const corsOptions = {
-  origin: 'https://formulair-ten.vercel.app', 
+  origin: 'https://formulair-ten.vercel.app',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   maxAge: 3600,
@@ -18,8 +17,8 @@ const corsOptions = {
 // Appliquer le middleware CORS de manière globale
 app.use(cors(corsOptions));
 
-// Autres middlewares
-app.use(bodyParser.json());
+// Utiliser le middleware JSON intégré d'Express
+app.use(express.json());
 
 // Routes pour gérer les alumnis
 
@@ -35,11 +34,15 @@ app.get('/alumnis', async (req, res, next) => {
 app.get('/alumni/:id', async (req, res, next) => {
   try {
     const alumniId = parseInt(req.params.id);
+    if (isNaN(alumniId)) {
+      return res.status(400).json({ error: 'ID invalide' });
+    }
+    
     const alumni = await prisma.alumni.findUnique({ where: { id: alumniId } });
     if (alumni) {
       res.json(alumni);
     } else {
-      res.status(404).json({ error: 'Alumni non trouvée' });
+      res.status(404).json({ error: 'Alumni non trouvé' });
     }
   } catch (error) {
     next(error);
@@ -55,8 +58,8 @@ app.post('/alumnis', async (req, res, next) => {
       return res.status(400).json({ error: 'Requête invalide: Tous les champs sont obligatoires.' });
     }
 
-    const newAlumni = await prisma.alumni.create({ 
-      data: { nom, prenom, email, promo, campus, genre, date_de_naissance, numero, referentiel, periode } 
+    const newAlumni = await prisma.alumni.create({
+      data: { nom, prenom, email, promo, campus, genre, date_de_naissance, numero, referentiel, periode }
     });
 
     res.status(201).json({ message: 'Alumni ajouté avec succès', alumni: newAlumni });
@@ -68,16 +71,21 @@ app.post('/alumnis', async (req, res, next) => {
 app.put('/alumni/:id', async (req, res, next) => {
   try {
     const alumniId = parseInt(req.params.id);
-    const alumni = await prisma.alumni.findUnique({ where: { id: alumniId } });
-    if (alumni) {
-      const updatedAlumni = await prisma.alumni.update({
-        where: { id: alumniId },
-        data: { description: req.body.description },
-      });
-      res.json({ message: 'Alumni mis à jour avec succès', alumni: updatedAlumni });
-    } else {
-      res.status(404).json({ error: 'Alumni non trouvée' });
+    if (isNaN(alumniId)) {
+      return res.status(400).json({ error: 'ID invalide' });
     }
+    
+    const alumni = await prisma.alumni.findUnique({ where: { id: alumniId } });
+    if (!alumni) {
+      return res.status(404).json({ error: 'Alumni non trouvé' });
+    }
+
+    const updatedAlumni = await prisma.alumni.update({
+      where: { id: alumniId },
+      data: { ...req.body }, // Vous pouvez mettre à jour plusieurs champs ici
+    });
+
+    res.json({ message: 'Alumni mis à jour avec succès', alumni: updatedAlumni });
   } catch (error) {
     next(error);
   }
@@ -86,6 +94,10 @@ app.put('/alumni/:id', async (req, res, next) => {
 app.delete('/alumni/:id', async (req, res, next) => {
   try {
     const alumniId = parseInt(req.params.id);
+    if (isNaN(alumniId)) {
+      return res.status(400).json({ error: 'ID invalide' });
+    }
+
     await prisma.alumni.delete({ where: { id: alumniId } });
     res.json({ message: 'Alumni supprimé avec succès' });
   } catch (error) {
@@ -95,7 +107,7 @@ app.delete('/alumni/:id', async (req, res, next) => {
 
 // Middleware pour gérer les erreurs
 app.use((err, req, res, next) => {
-  console.error(err);
+  console.error(err.stack);
   res.status(500).json({ error: 'Erreur interne du serveur' });
 });
 
@@ -121,5 +133,6 @@ process.on('SIGINT', async () => {
 app.listen(port, () => {
   console.log(`Serveur écoutant sur le port ${port}`);
 });
+
 
 
