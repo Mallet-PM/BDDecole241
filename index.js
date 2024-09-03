@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 
 // Configuration de CORS
 const corsOptions = {
-  origin: 'https://66d62c096e9fc359902259bf--delicate-babka-fbbc73.netlify.app',
+  origin: 'https://bd-decole241-cfvs.vercel.app/',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   maxAge: 3600,
