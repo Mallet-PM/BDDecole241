@@ -3,12 +3,12 @@ import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 const prisma = new PrismaClient();
 
 // Configuration de CORS
 const corsOptions = {
-  origin: 'https://66d62c096e9fc359902259bf--delicate-babka-fbbc73.netlify.app/',
+  origin: 'https://66d62c096e9fc359902259bf--delicate-babka-fbbc73.netlify.app',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   maxAge: 3600,
@@ -21,9 +21,6 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // Routes pour gérer les alumnis
-
-app.options('/alumnis', cors(corsOptions));
-
 app.get('/alumnis', async (req, res, next) => {
   try {
     const alumnis = await prisma.alumni.findMany();
@@ -84,7 +81,7 @@ app.put('/alumni/:id', async (req, res, next) => {
 
     const updatedAlumni = await prisma.alumni.update({
       where: { id: alumniId },
-      data: { ...req.body }, // Vous pouvez mettre à jour plusieurs champs ici
+      data: { ...req.body },
     });
 
     res.json({ message: 'Alumni mis à jour avec succès', alumni: updatedAlumni });
@@ -135,6 +132,7 @@ process.on('SIGINT', async () => {
 app.listen(port, () => {
   console.log(`Serveur écoutant sur le port ${port}`);
 });
+
 
 
 
