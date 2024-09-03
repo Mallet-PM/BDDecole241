@@ -6,16 +6,25 @@ const app = express();
 const port = process.env.PORT || 5000;
 const prisma = new PrismaClient();
 
-// Configuration de CORS
+//configuration cors manuelle
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  next();
+});
+
+
+/*// Configuration de CORS
 const corsOptions = {
-  origin: 'https://bd-decole241-cfvs.vercel.app/',
+  origin: '',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   maxAge: 3600,
-};
+};*/
 
 // Appliquer le middleware CORS de manière globale
-app.use(cors(corsOptions));
+//app.use(cors(corsOptions));
 
 // Utiliser le middleware JSON intégré d'Express
 app.use(express.json());
